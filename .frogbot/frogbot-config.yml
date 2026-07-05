@@ -1,0 +1,9 @@
+- params:
+    git:
+      branches:
+        - main
+      repoName: "sample-maven-jackson-frogbot"
+    scan:
+      projects:
+        - workingDirs:
+            - .
