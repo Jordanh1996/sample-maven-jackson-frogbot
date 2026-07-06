@@ -10,4 +10,6 @@ Direct Maven dependency: `com.fasterxml.jackson.core:jackson-databind@2.18.8`.
 - Repo scan via `.github/workflows/frogbot-scan-repository.yml`
 - Platform profile must have **SCA enabled** + **Create automated fixes** (`create_auto_fix_pr`)
 
-On tokyoshiftleft (2026-07-05), remediation returns `NoFixVersion` for this CVE — Frogbot detects the vulnerability but does **not** open a fix PR. Use `frogbot-monorepo-demo` (npm minimatch) to verify fix-PR mechanics on the same tenant.
+On tokyoshiftleft (2026-07-05), remediation returns `NoFixVersion` for this CVE — Frogbot detects the vulnerability but does **not** open a fix PR. Use [frogbot-fix-repro-npm](https://github.com/Jordanh1996/frogbot-fix-repro-npm) (npm minimatch) to verify fix-PR mechanics on the same tenant.
+
+**Secrets:** `JF_URL`, `JF_ACCESS_TOKEN`, `JF_GIT_TOKEN` (PAT with `repo` scope).
