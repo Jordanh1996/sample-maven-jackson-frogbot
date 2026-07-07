@@ -1,0 +1,25 @@
+name: JFrog Auto-Fix
+
+on:
+  repository_dispatch:
+    types: [jfrog-auto-fix]
+
+jobs:
+  auto-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure git identity
+        run: |
+          git config --global user.name "jfrog-auto-fix[bot]"
+          git config --global user.email "auto-fix@jfrog.com"
+
+      - name: Run auto-fix
+        uses: orto17/auto-fix@v1
+        with:
+          component_name:   ${{ github.event.client_payload.component_name }}
+          affected_version: ${{ github.event.client_payload.affected_version }}
+          fix_version:      ${{ github.event.client_payload.fix_version }}
+          github_token:     ${{ secrets.AUTO_FIX_TOKEN }}
+          branch_name:      ${{ github.event.client_payload.branch_name || github.event.client_payload.branch }}
+          commit_hash:      ${{ github.event.client_payload.commit_hash }}
+          log_level:        ${{ github.event.client_payload.log_level || 'INFO' }}
