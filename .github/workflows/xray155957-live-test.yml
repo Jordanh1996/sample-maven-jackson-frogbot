@@ -1,0 +1,72 @@
+name: "XRAY-155957 live test"
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "Frogbot command to run"
+        required: true
+        default: "scan-repository"
+        type: choice
+        options:
+          - scan-repository
+          - scan-pull-request
+      target:
+        description: "JFrog platform to scan against"
+        required: true
+        default: "tokyo"
+        type: choice
+        options:
+          - tokyo
+          - tunnel
+      pr_id:
+        description: "Pull request id (scan-pull-request only)"
+        required: false
+        default: "6"
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  live-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out Frogbot from the XRAY-155957 branch
+        uses: actions/checkout@v4
+        with:
+          repository: Jordanh1996/frogbot
+          ref: feature/XRAY-155957-log-violation-link
+          path: frogbot-src
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: frogbot-src/go.mod
+
+      - name: Build Frogbot from source
+        run: go build -o "${RUNNER_TEMP}/frogbot" .
+        working-directory: frogbot-src
+
+      - name: Run Frogbot
+        env:
+          JF_URL: ${{ inputs.target == 'tokyo' && secrets.X155957_TOKYO_URL || secrets.X155957_TUNNEL_URL }}
+          JF_ACCESS_TOKEN: ${{ inputs.target == 'tokyo' && secrets.X155957_TOKYO_TOKEN || secrets.X155957_TUNNEL_TOKEN }}
+          JF_GIT_PROVIDER: github
+          JF_GIT_OWNER: ${{ github.repository_owner }}
+          JF_GIT_REPO: ${{ github.event.repository.name }}
+          JF_GIT_TOKEN: ${{ secrets.JF_GIT_TOKEN }}
+          JF_GIT_BASE_BRANCH: main
+          JF_GIT_PULL_REQUEST_ID: ${{ inputs.pr_id }}
+        run: |
+          set -o pipefail
+          "${RUNNER_TEMP}/frogbot" "${{ inputs.command }}" 2>&1 | tee "${RUNNER_TEMP}/frogbot.log" || true
+
+      - name: Show the failing-policy log
+        run: |
+          echo "=============== failing-policy log ==============="
+          grep -A 40 "triggered a policy rule" "${RUNNER_TEMP}/frogbot.log" || echo "No fail rule was triggered"
+          echo "================================================="
+          echo "Violation links printed:"
+          grep -c "Violation: " "${RUNNER_TEMP}/frogbot.log" || echo 0
