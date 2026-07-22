@@ -1,7 +1,7 @@
 - params:
     git:
       branches:
-        - frogbot-142814-secret
+        - main
       repoName: "sample-maven-jackson-frogbot"
     scan:
       projects:
