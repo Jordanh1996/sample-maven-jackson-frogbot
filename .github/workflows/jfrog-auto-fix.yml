@@ -2,7 +2,7 @@ name: JFrog Auto-Fix
 
 on:
   repository_dispatch:
-    types: [jfrog-auto-fix]
+    types: [jfrog-auto-pr, jfrog-auto-fix]
 
 jobs:
   auto-fix:
